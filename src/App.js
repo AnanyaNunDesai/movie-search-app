@@ -7,8 +7,10 @@ const apiKey = 'c1c3405856a6ad79e9685f4ea76cd2b6';
 const apiUrl = 'https://api.themoviedb.org/3/search/movie';
 
 const App = () => {
-  const [query, setQuery] = useState('');
+  const [page, setPage] = useState(1);
   const [movies, setMovies] = useState([]);
+  const [query, setQuery] = useState('');
+  const [selectedMovie, setSelectedMovie] = useState(null);
   const [error, setError] = useState(null);
 
 
@@ -42,6 +44,30 @@ const App = () => {
     }
   };
 
+  const handleLoadMore = async () => {
+    try {
+      const response = await axios.get(apiUrl, {
+        params: {
+          api_key: apiKey,
+          query: query,
+          page: page + 1, // Fetch the next page of results
+        },
+      });
+
+      const newMovies = response.data.results.slice(0, 10);
+      if (newMovies.length === 0) {
+        setError('No more results.');
+        return;
+      }
+
+      setMovies([...movies, ...newMovies]);
+      setPage(page + 1);
+    } catch (error) {
+      console.error('Error fetching movies:', error);
+      setError('An error occurred while fetching movies.');
+    }
+  };
+
   const renderErrorMessage = () => {
     if (error) {
       return (
@@ -53,8 +79,6 @@ const App = () => {
     return null;
   };
 
-
-  const [selectedMovie, setSelectedMovie] = useState(null);
 
   const handleMovieSelect = (movie) => {
     setSelectedMovie(movie);
@@ -84,7 +108,7 @@ const App = () => {
     <div className="App bg-gray-800">
       <div className="container mx-auto p-4">
         <div
-          className="font-['Open_Sans'] text-violet-100 bg-violet-800 mb-20 
+          className="font-bold text-violet-100 bg-violet-800 mb-20 
             p-5 container mx-auto flex flex-col gap-5 justify-center rounded-lg items-center
              md:justify-between lg:max-w-xl"
         >
@@ -125,12 +149,22 @@ const App = () => {
             </div>
           ))}
         </div>
-
-
+        {error && <div className="text-red-500 font-bold mb-4">{error}</div>}
+        {movies.length > 0 && (
+          <div className="flex justify-center mt-4">
+            <button
+              onClick={handleLoadMore}
+              className="bg-violet-600 hover:bg-blue-700 text-violet-200 font-bold py-2 px-4 mt-10 rounded-lg"
+            >
+              Load More
+            </button>
+          </div>
+        )}
+        {selectedMovie && <FloatingCard movie={selectedMovie} onClose={handleCloseCard} />}
       </div>
-      {selectedMovie && <FloatingCard movie={selectedMovie} onClose={handleCloseCard} />} {/* Display FloatingCard */}
     </div>
   );
+
 };
 
 export default App;

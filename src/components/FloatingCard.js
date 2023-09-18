@@ -19,7 +19,7 @@ const FloatingCard = ({ movie, onClose }) => {
 
   return (
     <div id="floating-card" className="fixed inset-0 flex justify-center items-center">
-      <div className="bg-white p-6 rounded shadow-lg relative">
+      <div className="bg-violet-300 text-violet-600 ml-72 mr-72 p-6 rounded shadow-lg relative">
         <button
           onClick={onClose}
           className="absolute top-2 right-2 text-gray-500 hover:text-red-500"
