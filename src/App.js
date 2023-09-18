@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import axios from 'axios'; // Import Axios
+import axios from 'axios';
+import FloatingCard from './components/FloatingCard'; // Import FloatingCard
 import './App.css';
 
 const apiKey = 'c1c3405856a6ad79e9685f4ea76cd2b6';
@@ -9,6 +10,7 @@ const App = () => {
   const [query, setQuery] = useState('');
   const [movies, setMovies] = useState([]);
   const [error, setError] = useState(null);
+
 
 
   const handleSearch = async () => {
@@ -73,6 +75,10 @@ const App = () => {
     return null;
   };
 
+   const handleCloseCard = () => {
+    setSelectedMovie(null);
+  };
+
 
   return (
     <div className="App">
@@ -112,9 +118,9 @@ const App = () => {
           ))}
         </div>
 
-        {renderMovieDetails()}
 
       </div>
+      {selectedMovie && <FloatingCard movie={selectedMovie} onClose={handleCloseCard}/>} {/* Display FloatingCard */}
     </div>
   );
 };
