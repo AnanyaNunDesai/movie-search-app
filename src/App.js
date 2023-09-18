@@ -61,39 +61,47 @@ const App = () => {
   };
 
   // Function to display additional movie details
-  const renderMovieDetails = () => {
-    if (selectedMovie) {
-      return (
-        <div className="mt-4">
-          <h2 className="text-xl font-bold">{selectedMovie.title}</h2>
-          <p className="text-gray-700">Overview: {selectedMovie.overview}</p>
-          <p className="text-gray-700">Release Date: {selectedMovie.release_date}</p>
-          <p className="text-gray-700">Average Rating: {selectedMovie.vote_average}</p>
-        </div>
-      );
-    }
-    return null;
-  };
+  // const renderMovieDetails = () => {
+  //   if (selectedMovie) {
+  //     return (
+  //       <div className="mt-4">
+  //         <h2 className="text-xl font-bold">{selectedMovie.title}</h2>
+  //         <p className="text-gray-700">Overview: {selectedMovie.overview}</p>
+  //         <p className="text-gray-700">Release Date: {selectedMovie.release_date}</p>
+  //         <p className="text-gray-700">Average Rating: {selectedMovie.vote_average}</p>
+  //       </div>
+  //     );
+  //   }
+  //   return null;
+  // };
 
-   const handleCloseCard = () => {
+  const handleCloseCard = () => {
     setSelectedMovie(null);
   };
 
 
   return (
-    <div className="App">
+    <div className="App bg-gray-800">
       <div className="container mx-auto p-4">
-        <h1 className="text-2xl font-bold mb-4">Movie Search</h1>
-        <div className="flex mb-4">
+        <div
+          className="font-['Open_Sans'] text-violet-100 bg-violet-800 mb-20 
+            p-5 container mx-auto flex flex-col gap-5 justify-center rounded-lg items-center
+             md:justify-between lg:max-w-xl"
+        >
+          <h1 className="text-3xl">Movie Search</h1>
+        </div>
+        <div className="flex mb-20 justify-center items-center ">
           <input
             type="text"
-            className="w-full p-2 rounded"
+            className="bg-violet-500 outline-none rounded-lg border-b-2 
+                border-violet-500 py-2 px-2 text-indigo-900 text-center 
+                md:text-left focus:border-indigo-900 focus:bg-violet-400 duration-300 placeholder-violet-300"
             placeholder="Search for a movie"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
           <button
-            className="ml-2 p-2 bg-blue-500 text-white rounded"
+            className="ml-2 p-2 rounded-lg bg-violet-700 text-violet-200 hover:text-white rounded"
             onClick={handleSearch}
           >
             Search
@@ -104,23 +112,23 @@ const App = () => {
           {movies.map((movie) => (
             <div
               key={movie.id}
-              className="bg-white p-4 rounded shadow cursor-pointer"
+              className="bg-violet-900 rounded-lg p-4 shadow cursor-pointer"
               onClick={() => handleMovieSelect(movie)}
             >
               <img
                 src={`https://image.tmdb.org/t/p/w300${movie.poster_path}`}
                 alt={movie.title}
-                className="mb-2"
+                className="mx-auto flex justify-center items-center rounded-lg"
               />
-              <h2 className="text-xl font-bold">{movie.title}</h2>
-              <p className="text-gray-700">{movie.overview}</p>
+              <h2 className="text-xl text-violet-200 font-bold mt-4">{movie.title}</h2>
+              <p className="text-violet-300">{movie.overview}</p>
             </div>
           ))}
         </div>
 
 
       </div>
-      {selectedMovie && <FloatingCard movie={selectedMovie} onClose={handleCloseCard}/>} {/* Display FloatingCard */}
+      {selectedMovie && <FloatingCard movie={selectedMovie} onClose={handleCloseCard} />} {/* Display FloatingCard */}
     </div>
   );
 };
