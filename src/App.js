@@ -1,48 +1,59 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import FloatingCard from './components/FloatingCard'; // Import FloatingCard
-import './App.css';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
-const apiKey = 'c1c3405856a6ad79e9685f4ea76cd2b6';
-const apiUrl = 'https://api.themoviedb.org/3/search/movie';
+import FloatingCard from "./components/FloatingCard";
+
+import "./App.css";
+
+const apiKey = process.env.REACT_APP_API_KEY;
+const apiUrl = "https://api.themoviedb.org/3/search/movie";
 
 const App = () => {
   const [page, setPage] = useState(1);
   const [movies, setMovies] = useState([]);
-  const [query, setQuery] = useState('');
+  const [query, setQuery] = useState("");
   const [selectedMovie, setSelectedMovie] = useState(null);
   const [error, setError] = useState(null);
 
+  const TYPE_TIME = 300; // 300 milliseconds
 
+  // Trigger an API search shortly after typing
+  useEffect(() => {
+    const handleSearch = async () => {
+      try {
+        setError(null); // Reset the error state
 
-  const handleSearch = async () => {
-    try {
-      setError(null); // Reset the error state
+        if (query.trim() === "") {
+          setMovies([]);
+          return;
+        }
 
-      if (query.trim() === '') {
-        setMovies([]);
-        return;
+        const response = await axios.get(apiUrl, {
+          params: {
+            api_key: apiKey,
+            query: query,
+          },
+        });
+
+        const results = response.data.results.slice(0, 10); // Display 10 search results at a time
+
+        if (results.length === 0) {
+          setError("No results found.");
+          setMovies([]);
+        } else {
+          setMovies(results);
+        }
+      } catch (error) {
+        console.error("Error fetching movies:", error);
+        setError("An error occurred while fetching movies.");
       }
+    };
 
-      const response = await axios.get(apiUrl, {
-        params: {
-          api_key: apiKey,
-          query: query,
-        },
-      });
-
-      const results = response.data.results.slice(0, 10); // Display 10 search results at a time
-
-      if (results.length === 0) {
-        setError('No results found.'); // Set an error message for no results
-      } else {
-        setMovies(results);
-      }
-    } catch (error) {
-      console.error('Error fetching movies:', error);
-      setError('An error occurred while fetching movies.'); // Set a generic error message
-    }
-  };
+    const timer = setTimeout(async () => {
+      await handleSearch();
+    }, TYPE_TIME);
+    return () => clearTimeout(timer);
+  }, [query]);
 
   const handleLoadMore = async () => {
     try {
@@ -56,53 +67,32 @@ const App = () => {
 
       const newMovies = response.data.results.slice(0, 10);
       if (newMovies.length === 0) {
-        setError('No more results.');
+        setError("No more results.");
         return;
       }
 
       setMovies([...movies, ...newMovies]);
       setPage(page + 1);
     } catch (error) {
-      console.error('Error fetching movies:', error);
-      setError('An error occurred while fetching movies.');
+      console.error("Error fetching movies:", error);
+      setError("An error occurred while fetching movies.");
     }
   };
 
   const renderErrorMessage = () => {
     if (error) {
-      return (
-        <div className="text-red-500 font-bold mb-4">
-          Error: {error}
-        </div>
-      );
+      return <div className="text-red-500 font-bold mb-4">Error: {error}</div>;
     }
     return null;
   };
-
 
   const handleMovieSelect = (movie) => {
     setSelectedMovie(movie);
   };
 
-  // Function to display additional movie details
-  // const renderMovieDetails = () => {
-  //   if (selectedMovie) {
-  //     return (
-  //       <div className="mt-4">
-  //         <h2 className="text-xl font-bold">{selectedMovie.title}</h2>
-  //         <p className="text-gray-700">Overview: {selectedMovie.overview}</p>
-  //         <p className="text-gray-700">Release Date: {selectedMovie.release_date}</p>
-  //         <p className="text-gray-700">Average Rating: {selectedMovie.vote_average}</p>
-  //       </div>
-  //     );
-  //   }
-  //   return null;
-  // };
-
   const handleCloseCard = () => {
     setSelectedMovie(null);
   };
-
 
   return (
     <div className="App bg-gray-800">
@@ -114,8 +104,9 @@ const App = () => {
         >
           <h1 className="text-3xl">Movie Search</h1>
         </div>
-        <div className="flex mb-20 justify-center items-center ">
+        <div className="flex mb-20 justify-center items-center">
           <input
+            aria-label="search-field"
             type="text"
             className="bg-violet-500 outline-none rounded-lg border-b-2 
                 border-violet-500 py-2 px-2 text-indigo-900 text-center 
@@ -124,17 +115,15 @@ const App = () => {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
-          <button
-            className="ml-2 p-2 rounded-lg bg-violet-700 text-violet-200 hover:text-white rounded"
-            onClick={handleSearch}
-          >
-            Search
-          </button>
         </div>
         {renderErrorMessage()}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div
+          aria-label="movies-results"
+          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+        >
           {movies.map((movie) => (
             <div
+              id={movie.id}
               key={movie.id}
               className="bg-violet-900 rounded-lg p-4 shadow cursor-pointer"
               onClick={() => handleMovieSelect(movie)}
@@ -144,7 +133,9 @@ const App = () => {
                 alt={movie.title}
                 className="mx-auto flex justify-center items-center rounded-lg"
               />
-              <h2 className="text-xl text-violet-200 font-bold mt-4">{movie.title}</h2>
+              <h2 className="text-xl text-violet-200 font-bold mt-4">
+                {movie.title}
+              </h2>
               <p className="text-violet-300">{movie.overview}</p>
             </div>
           ))}
@@ -160,18 +151,12 @@ const App = () => {
             </button>
           </div>
         )}
-        {selectedMovie && <FloatingCard movie={selectedMovie} onClose={handleCloseCard} />}
+        {selectedMovie && (
+          <FloatingCard movie={selectedMovie} onClose={handleCloseCard} />
+        )}
       </div>
     </div>
   );
-
 };
 
 export default App;
-
-
-//API key: c1c3405856a6ad79e9685f4ea76cd2b6
-//API Read Access Token: eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJ
-//jMWMzNDA1ODU2YTZhZDc5ZTk2ODVmNGVhNzZjZDJiNiIsInN1YiI6IjY
-//1MDg3ZjhjZmEyN2Y0MDBhZTlmNzZhMSIsInNjb3BlcyI6WyJhcGlfcmVhZ
-//CJdLCJ2ZXJzaW9uIjoxfQ.kzZKSqlwkfI7Dn1rmOKg7vu-lK7u_TAjTLTxFgMiu24
